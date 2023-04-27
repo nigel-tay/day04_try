@@ -1,0 +1,6 @@
+Apples are red
+Grapes are purple
+Grass is green
+Carrots are orange
+Bananas are yellow
+Blueberries are blue
