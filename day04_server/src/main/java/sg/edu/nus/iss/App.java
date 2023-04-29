@@ -31,25 +31,46 @@ public class App
 
         // Write a start server function
         ServerSocket server = new ServerSocket(3000);
+        System.out.println("Server listening on port: 3000");
         Socket socket = server.accept();
 
         try {
             InputStream is = socket.getInputStream();
             BufferedInputStream bis = new BufferedInputStream(is);
             DataInputStream dis = new DataInputStream(bis);
-            String receivedInput = dis.readUTF();
+            String receivedInput = "";
 
-            OutputStream os = socket.getOutputStream();
-            BufferedOutputStream bos = new BufferedOutputStream(os);
-            DataOutputStream dos = new DataOutputStream(bos);
-
-            if (receivedInput.equals("quote")) {
-                dos.writeUTF(cookieInstance.retrieveCookie(cookieFact, randomNumber, cookieFile, fr, br, lr));
-                dos.flush();
+            try {
+                OutputStream os = socket.getOutputStream();
+                BufferedOutputStream bos = new BufferedOutputStream(os);
+                DataOutputStream dos = new DataOutputStream(bos);
+    
+                while(!(receivedInput.equals("quit"))) {
+                    receivedInput = dis.readUTF();
+                    if (receivedInput.equals("quote")) {
+                        dos.writeUTF(cookieInstance.retrieveCookie(cookieFact, randomNumber, cookieFile, fr, br, lr));
+                        dos.flush();
+                    }
+                    else {
+                        dos.writeUTF("");
+                        dos.flush();
+                    }
+                }
+                System.out.println("quit received, exiting program...");
+                dos.close();
+                bos.close();
+                os.close();
             }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            dis.close();
+            bis.close();
+            is.close();
         }
         catch(Exception e) {
-            System.out.println(e);
+            e.printStackTrace();
             socket.close();
             server.close();
         }
