@@ -1,10 +1,18 @@
 package sg.edu.nus.iss;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.LineNumberReader;
+import java.io.OutputStream;
+import java.net.ServerSocket;
+import java.net.Socket;
 
 public class App 
 {
@@ -19,32 +27,36 @@ public class App
         LineNumberReader lr = null;
         String cookieFact = "";
         int randomNumber = 0;
+        Cookie cookieInstance = new Cookie();
 
-        System.out.println(retrieveCookie(cookieFact, randomNumber, cookieFile, fr, br, lr));
-    }
-    // Write a start server function
+        // Write a start server function
+        ServerSocket server = new ServerSocket(3000);
+        Socket socket = server.accept();
 
-    // Write a retrieveCookie function
-    public static String retrieveCookie(String fact, int randomNumber, File file, FileReader fr, BufferedReader br, LineNumberReader lr) throws IOException {
         try {
-            fr = new FileReader(file);
-            br = new BufferedReader(fr);
-            randomNumber = (int) Math.round(Math.random() * 6);
-            for (int i = 1; i <= 6; i++) {
-                fact = br.readLine();
-                if (i == randomNumber) {
-                    br.close();
-                    return fact;
-                }
+            InputStream is = socket.getInputStream();
+            BufferedInputStream bis = new BufferedInputStream(is);
+            DataInputStream dis = new DataInputStream(bis);
+            String receivedInput = dis.readUTF();
+
+            OutputStream os = socket.getOutputStream();
+            BufferedOutputStream bos = new BufferedOutputStream(os);
+            DataOutputStream dos = new DataOutputStream(bos);
+
+            if (receivedInput.equals("quote")) {
+                dos.writeUTF(cookieInstance.retrieveCookie(cookieFact, randomNumber, cookieFile, fr, br, lr));
+                dos.flush();
             }
         }
         catch(Exception e) {
             System.out.println(e);
+            socket.close();
+            server.close();
         }
         finally {
-            fr.close();
+            socket.close();
+            server.close();
         }
 
-        return fact;
     }
 }
